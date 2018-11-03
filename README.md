@@ -1,3 +1,5 @@
+https://github.com/eggheadio-projects/up-and-running-with-redux-observable
+
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
 
 ## Available Scripts
