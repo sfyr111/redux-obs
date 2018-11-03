@@ -1,27 +1,31 @@
 import { Observable } from "rxjs";
 import { combineEpics } from "redux-observable";
 import {
+  CANCEL_SEARCH,
   receiveBeers,
   searchBeersError,
   searchBeersLoading,
   SEARCHED_BEERS
 } from "../actions/index";
+
 import "rxjs/add/operator/debounceTime";
 import "rxjs/add/operator/filter";
 import "rxjs/add/operator/switchMap";
 import "rxjs/add/observable/dom/ajax";
+import "rxjs/add/operator/delay";
 import "rxjs/add/operator/map";
 import "rxjs/add/operator/catch";
 import "rxjs/add/observable/of";
 import "rxjs/add/observable/throw";
 import "rxjs/add/observable/concat";
+import "rxjs/add/operator/takeUntil";
 
 const beers = `https://api.punkapi.com/v2/beers`;
 const search = term => `${beers}?beer_name=${encodeURIComponent(term)}`;
 const ajax = term =>
   term === "skull"
     ? Observable.throw(new Error("Ajax failed!"))
-    : Observable.ajax.getJSON(search(term));
+    : Observable.ajax.getJSON(search(term)).delay(5000);
 
 function searchBeersEpic(action$) {
   return action$
@@ -34,6 +38,7 @@ function searchBeersEpic(action$) {
 
       // external API call
       const request = ajax(payload)
+        .takeUntil(action$.ofType(CANCEL_SEARCH))
         .map(receiveBeers)
         .catch(err => {
           return Observable.of(searchBeersError(err));
