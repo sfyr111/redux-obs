@@ -1,8 +1,8 @@
 import { forkJoin, of, throwError } from 'rxjs'
 import { ajax } from 'rxjs/ajax'
-import { switchMap, map, mergeMap, debounceTime, catchError } from 'rxjs/operators'
+import { switchMap, map, mergeMap, debounceTime, catchError, filter, concat } from 'rxjs/operators'
 import { combineEpics, ofType } from 'redux-observable'
-import { receiveBeers, searchBeersError, SEARCHED_BEERS } from '../actions/index'
+import { receiveBeers, searchBeersError, searchBeersLoading, SEARCHED_BEERS } from '../actions/index'
 
 const beers = `https://api.punkapi.com/v2/beers`;
 const search = term => `${beers}?beer_name=${encodeURIComponent(term)}`;
@@ -15,11 +15,15 @@ function searchBeersEpic(action$) {
   return action$.pipe(
     ofType(SEARCHED_BEERS),
     debounceTime(500),
-    switchMap(({ payload }) => ajax$(payload).pipe(
-      (res) => console.log(res) || res,
-      map(receiveBeers),
-      catchError(err => of(searchBeersError(err)))
-    ))
+    filter(action => action.payload !== ''), // 排除空 string 参数
+    switchMap(({ payload }) => {
+      const loading = of(searchBeersLoading(true))
+      const request = ajax$(payload).pipe(
+          map(receiveBeers),
+          catchError(err => of(searchBeersError(err)))
+      )
+      return loading.pipe(concat(request))
+    })
   )
 }
 
