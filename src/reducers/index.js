@@ -26,6 +26,8 @@ const initialState = {
 };
 
 export function storiesReducer(state = initialState, action) {
+  console.log(action)
+  // alert(JSON.stringify(action))
   switch(action.type) {
     case LOAD_STORIES:
       return {
