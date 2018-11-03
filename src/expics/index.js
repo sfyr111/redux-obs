@@ -13,6 +13,7 @@ function searchBeersEpic(action$) {
     ofType(SEARCHED_BEERS),
     debounceTime(500),
     switchMap(({ payload }) => ajax$(payload).pipe(
+      (res) => console.log(res) || res,
       map(receiveBeers)
     ))
   )
