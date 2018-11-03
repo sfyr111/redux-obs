@@ -19,7 +19,6 @@ function searchBeersEpic(action$) {
     switchMap(({ payload }) => {
       const loading = of(searchBeersLoading(true))
       const request = ajax$(payload).pipe(
-        delay(2000),
         takeUntil(action$.ofType(CANCEL_SEARCH)),
         map(receiveBeers),
         catchError(err => of(searchBeersError(err)))
